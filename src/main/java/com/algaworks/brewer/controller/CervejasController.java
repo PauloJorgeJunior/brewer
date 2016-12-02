@@ -50,7 +50,7 @@ public class CervejasController {
 	public ModelAndView cadastrar(@Valid Cerveja cerveja, BindingResult result, Model model,
 			RedirectAttributes attributes) {
 		if (result.hasErrors()) {
-			return novo(cerveja);
+			//return novo(cerveja);
 		}
 
 		cadastroCervejaService.salvar(cerveja);
