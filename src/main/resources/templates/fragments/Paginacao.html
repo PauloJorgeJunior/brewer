@@ -36,61 +36,6 @@
 					<span th:if="${pagina.ultima}">Última</span>
 					<a th:if="${not pagina.ultima}" th:href="${pagina.urlParaPagina(pagina.total-1)}">Última</a>	
 				</li>
-				
-				
-				
-				
-				
-				<!-- 
-				<li>
-					<span th:text="${(paginaAtual+1)-pagina.MaxLinks}"></span>
-				</li>
-				<li>
-					<span th:text="${pagina.AtualView}"></span>
-				</li> -->
-				<!-- 
-				<th:block th:each="p : ${#numbers.sequence(${pagina.AtualView-pagina.MaxLinks,pagina.AtualView-1,1)}">
-				<li>
-					<span>[[${p}]]</span>
-				</li>
-					<li th:class="${paginaAtual == numeroPagina} ? active">
-						<a th:href="${pagina.urlParaPagina(numeroPagina)}">[[${p}]]</a>
-					</li>  
-				</th:block>-->
-				
-				
-				
-				
-				<!--
-				<li th:class="${not pagina.primeira} ? '' : disabled">
-					<span th:if="${pagina.primeira}">&laquo;</span>
-					<a th:if="${not pagina.primeira}" th:href="${pagina.urlParaPagina(paginaAtual - 1)}" title="Proxima página">&laquo;</a>
-					
-				</li>
-				<li th:each="item : ${#numbers.sequence(1,pagina.total)}" th:with="numeroPagina=${item - 1}" 
-					th:class="${paginaAtual == numeroPagina} ? active">
-					<span th:if="${item == paginaAtual}" th:text="${item}"></span>
-					<a th:if="${item != paginaAtual}" th:href="${pagina.urlParaPagina(numeroPagina)}">
-						<span th:text="${item}"></span>
-					</a>
-				</li>
-				
-				<li>
-				</li> -->
-				
-				<!-- <li th:class="${pagina.primeira} ? disabled">
-					<a th:href="${pagina.urlParaPagina(paginaAtual - 1)}" th:remove="${pagina.primeira} ? tag"><span>&laquo;</span></a>
-				</li>
-				
-				<th:block th:each="p : ${#numbers.sequence(1, pagina.total)}" th:with="numeroPagina=${p - 1}">
-					<li th:class="${paginaAtual == numeroPagina} ? active">
-						<a th:href="${pagina.urlParaPagina(numeroPagina)}">[[${p}]]</a>
-					</li>
-				</th:block>
-				
-				<li th:class="${pagina.ultima} ? disabled">
-					<a th:href="${pagina.urlParaPagina(paginaAtual + 1)}" th:remove="${pagina.ultima} ? tag"><span>&raquo;</span></a>
-				</li> -->
 			</ul>
 		</nav>
 	</div>

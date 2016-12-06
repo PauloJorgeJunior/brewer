@@ -14,7 +14,7 @@ public class PageWrapper<T> {
 
 	private Page<T> page;
 	private UriComponentsBuilder uriBuilder;
-	private int maxLinks = 5;
+	private int maximoLinks = 5;
 
 	public PageWrapper(Page<T> page, HttpServletRequest httpServletRequest) {
 		this.page = page;
@@ -32,8 +32,8 @@ public class PageWrapper<T> {
 		return page.getContent().isEmpty();
 	}
 
-	public int getMaxLinks() {
-		return maxLinks;
+	public int getMaximoLinks() {
+		return maximoLinks;
 	}
 
 	public int getAtual() {
@@ -62,21 +62,21 @@ public class PageWrapper<T> {
 	}
 
 	public List<Integer> linksNegativos() {
-		List<Integer> listOfInt = new ArrayList<Integer>();
-		for (int i = getAtualView() - getMaxLinks(); i <= getAtualView(); i++) {
+		List<Integer> listaInt = new ArrayList<Integer>();
+		for (int i = getAtualView() - getMaximoLinks(); i <= getAtualView(); i++) {
 			if (i >= 1)
-				listOfInt.add(i);
+				listaInt.add(i);
 		}
-		return listOfInt;
+		return listaInt;
 	}
-	
+
 	public List<Integer> linksPositivos() {
-		List<Integer> listOfInt = new ArrayList<Integer>();
-		for (int i = getAtualView()+1; i <= getAtualView() + getMaxLinks(); i++) {
+		List<Integer> listaInt = new ArrayList<Integer>();
+		for (int i = getAtualView() + 1; i <= getAtualView() + getMaximoLinks(); i++) {
 			if (i <= getTotal())
-				listOfInt.add(i);
+				listaInt.add(i);
 		}
-		return listOfInt;
+		return listaInt;
 	}
 
 	public String urlOrdenada(String propriedade) {
