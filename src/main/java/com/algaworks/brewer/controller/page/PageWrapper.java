@@ -1,5 +1,6 @@
 package com.algaworks.brewer.controller.page;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import javax.servlet.http.HttpServletRequest;
@@ -13,12 +14,13 @@ public class PageWrapper<T> {
 
 	private Page<T> page;
 	private UriComponentsBuilder uriBuilder;
+	private int maxLinks = 5;
 
 	public PageWrapper(Page<T> page, HttpServletRequest httpServletRequest) {
 		this.page = page;
-		String httpUrl = httpServletRequest.getRequestURL().append(
-				httpServletRequest.getQueryString() != null ? "?" + 
-				httpServletRequest.getQueryString() : "").toString().replaceAll("\\+", "%20");
+		String httpUrl = httpServletRequest.getRequestURL()
+				.append(httpServletRequest.getQueryString() != null ? "?" + httpServletRequest.getQueryString() : "")
+				.toString().replaceAll("\\+", "%20");
 		this.uriBuilder = UriComponentsBuilder.fromHttpUrl(httpUrl);
 	}
 
@@ -30,11 +32,20 @@ public class PageWrapper<T> {
 		return page.getContent().isEmpty();
 	}
 
+	public int getMaxLinks() {
+		return maxLinks;
+	}
+
 	public int getAtual() {
 		return page.getNumber();
 	}
 
+	public int getAtualView() {
+		return page.getNumber() + 1;
+	}
+
 	public boolean isPrimeira() {
+		linksNegativos();
 		return page.isFirst();
 	}
 
@@ -48,6 +59,24 @@ public class PageWrapper<T> {
 
 	public String urlParaPagina(int pagina) {
 		return uriBuilder.replaceQueryParam("page", pagina).build(true).encode().toUriString();
+	}
+
+	public List<Integer> linksNegativos() {
+		List<Integer> listOfInt = new ArrayList<Integer>();
+		for (int i = getAtualView() - getMaxLinks(); i <= getAtualView(); i++) {
+			if (i >= 1)
+				listOfInt.add(i);
+		}
+		return listOfInt;
+	}
+	
+	public List<Integer> linksPositivos() {
+		List<Integer> listOfInt = new ArrayList<Integer>();
+		for (int i = getAtualView()+1; i <= getAtualView() + getMaxLinks(); i++) {
+			if (i <= getTotal())
+				listOfInt.add(i);
+		}
+		return listOfInt;
 	}
 
 	public String urlOrdenada(String propriedade) {
