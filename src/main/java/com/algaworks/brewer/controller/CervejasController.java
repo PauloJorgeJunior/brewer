@@ -8,6 +8,7 @@ import javax.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.web.PageableDefault;
+import org.springframework.http.MediaType;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
@@ -37,7 +38,7 @@ public class CervejasController {
 
 	@Autowired
 	private CadastroCervejaService cadastroCervejaService;
-	
+
 	@Autowired
 	private Cervejas cervejas;
 
@@ -54,28 +55,29 @@ public class CervejasController {
 	public ModelAndView cadastrar(@Valid Cerveja cerveja, BindingResult result, Model model,
 			RedirectAttributes attributes) {
 		if (result.hasErrors()) {
-			//return novo(cerveja);
+			// return novo(cerveja);
 		}
 
 		cadastroCervejaService.salvar(cerveja);
 		attributes.addFlashAttribute("mensagem", "Cerveja salva com sucesso!");
 		return new ModelAndView("redirect:/cervejas/novo");
 	}
-	
+
 	@GetMapping
-	public ModelAndView pesquisar(CervejaFilter cervejaFilter, BindingResult result, @PageableDefault(size=2) Pageable pageable,
-			HttpServletRequest httpServletRequest){
+	public ModelAndView pesquisar(CervejaFilter cervejaFilter, BindingResult result,
+			@PageableDefault(size = 2) Pageable pageable, HttpServletRequest httpServletRequest) {
 		ModelAndView mv = new ModelAndView("cerveja/PesquisaCervejas");
-		mv.addObject("estilos",estilos.findAll());
+		mv.addObject("estilos", estilos.findAll());
 		mv.addObject("sabores", Sabor.values());
 		mv.addObject("origens", Origem.values());
-		
-		PageWrapper<Cerveja> paginaWrapper = new PageWrapper<>(cervejas.filtrar(cervejaFilter, pageable),httpServletRequest);
-		mv.addObject("pagina", paginaWrapper );
+
+		PageWrapper<Cerveja> paginaWrapper = new PageWrapper<>(cervejas.filtrar(cervejaFilter, pageable),
+				httpServletRequest);
+		mv.addObject("pagina", paginaWrapper);
 		return mv;
 	}
-	
-	@GetMapping("/filtro")
+
+	@RequestMapping(consumes = MediaType.APPLICATION_JSON_VALUE)
 	public @ResponseBody List<CervejaDTO> pesquisar(String skuOuNome) {
 		return cervejas.porSkuOuNome(skuOuNome);
 	}
