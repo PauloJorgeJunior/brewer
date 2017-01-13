@@ -1,27 +1,30 @@
 /*
-############################
+######################
 # UTILIDADES
-###########################
+######################
 */
-.bw-glyphicon-large{
+.bw-glyphicon-large {
 	font-size: 18px;
 }
 
-.bw-required > .control-label:after{
-	content: "*"
+.bw-required > .control-label:after {
+	content: "*";
 }
+
+
 
 /*
-############################
+######################
 # COMPONENTES
-###########################
+######################
 */
 
-/*Field Action*/
-.bw-field-action{
+/* Field Action */
+.bw-field-action {
 	display: flex;
 }
-.bw-field-action-icon{
+
+.bw-field-action__icon {
 	margin: 6px 0 0 5px;
 }
 
@@ -56,21 +59,22 @@
     font-size: 500px;
 }
 
-/* Tabela Simples*/
+/* Tabela Simples */
 .bw-tabela-simples {
 	margin-top: 15px;
 }
 
-.br-tabela-simples table tr th{
+.bw-tabela-simples table tr th {
 	border-bottom-width: 1px;
 }
 
-.br-tabela-simples table tr td{
-	border-top: none;
-	border-bottom: 1px solid #e7eaec;
-	padding: 10px;
-	vertical-align: middle;
+.bw-tabela-simples table tr td {
+    border-top: none;
+    border-bottom: 1px solid #e7eaec;
+    padding: 10px;
+    vertical-align: middle;
 }
+
 /*
 ###################
 # PÁGINAS DO SISTEMA
@@ -78,13 +82,11 @@
 */
 
 /* Colunas comuns */
-
 .table-col-acoes {
 	width: 80px;
 }
 
 /* Colunas - Pesquisa de Cervejas */
-
 .table-cervejas-col-foto {
 	min-width: 50px;
 	width: 50px
@@ -117,13 +119,11 @@
 }
 
 /* Colunas - Pesquisa de Estilos */
-
 .table-estilos-col-codigo {
 	width: 80px;
 }
 
 /* Colunas - Pesquisa de Clientes */
-
 .table-clientes-col-nome {
 	
 }
@@ -142,13 +142,13 @@
 	width: 140px;
 	text-align: right;
 }
+
 .table-clientes-col-cidade-estado {
 	width: 140px;
 	text-align: right;
 }
 
 /* Colunas - Pesquisa de cidades */
-
 .table-cidades-col-nome {
 	
 }
@@ -163,6 +163,23 @@
 	width: 30px;
 	text-align: center;
 }
+
+/* Tabela Cervejas página de Venda */
+.bw-tabela-cervejas {
+	margin-bottom: 15px;
+}
+
+.bw-tabela-cervejas__vazio {
+	padding: 15px 15px;
+	
+	border: 1px dashed #ddd;
+	
+	text-align: center;
+	font-size: 1.2em;
+	font-weight: 300;
+	color: #555;
+}
+
 
 /*
 ######################################
@@ -183,6 +200,11 @@
 .easy-autocomplete-container ul li {
 	font-size: 1em !important;
 	padding: 0px 5px !important;
+}
+
+/* Box */
+.negativo .aw-box__value {
+	color: red;
 }
 
 /* Tabela Item */
@@ -258,7 +280,41 @@
 	font-size: 1.6em;
 }
 
+.bw-tabela-item__painel-exclusao {
+    position: absolute;
+    top: 0;
+    right: 100000px;
+	height: 100%;
+    width: 50%;
+    
+    text-align: center;
+    padding-top: 35px;
+    
+	background-color: #f0ad4e;
+	
+	opacity: 0;
+	transition: opacity 0.5s;
+}
+
+.solicitando-exclusao .bw-tabela-item__painel-exclusao {
+	right: 0;
+	opacity: 1;
+}
+
+.bw-tabela-item__titulo-exclusao {
+    display: block;
+    margin-bottom: 5px;
+    
+	color: #fff;
+    font-size: 1.3em;
+}
+
 @media (min-width: 768px) { /* screen-sm-min */
+	.bw-tabela-item__painel-exclusao {
+		width: 40%;
+		padding-top: 10px;
+	}
+	
 	.bw-tabela-item__coluna {
 		float: left;
 		margin-left: 0px;
