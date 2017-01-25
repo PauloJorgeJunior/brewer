@@ -5,7 +5,6 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.context.request.async.DeferredResult;
@@ -21,29 +20,24 @@ public class FotosController {
 	
 	@Autowired
 	private FotoStorage fotoStorage;
-
+	
 	@PostMapping
 	public DeferredResult<FotoDTO> upload(@RequestParam("files[]") MultipartFile[] files) {
 		DeferredResult<FotoDTO> resultado = new DeferredResult<>();
 
-		Thread thread = new Thread(new FotoStorageRunnable(files,resultado, fotoStorage));
+		Thread thread = new Thread(new FotoStorageRunnable(files, resultado, fotoStorage));
 		thread.start();
 		
 		return resultado;
 	}
 	
 	@GetMapping("/temp/{nome:.*}")
-	public byte[] recuperarFotoTemporaria(@PathVariable String nome){
+	public byte[] recuperarFotoTemporaria(@PathVariable String nome) {
 		return fotoStorage.recuperarFotoTemporaria(nome);
 	}
 	
-	@RequestMapping(path = "/temp/delete/{nome:.*}", method = { RequestMethod.DELETE })
-	public void apagarFotoTemporaria(@PathVariable String nome){
-		fotoStorage.apagarFotoTemporaria(nome);
-	}
-	
 	@GetMapping("/{nome:.*}")
-	public byte[] recuperarFoto(@PathVariable String nome){
-		return fotoStorage.recuperarFoto(nome);
+	public byte[] recuperar(@PathVariable String nome) {
+		return fotoStorage.recuperar(nome);
 	}
 }

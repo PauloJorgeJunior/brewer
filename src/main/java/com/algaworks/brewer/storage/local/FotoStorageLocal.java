@@ -25,28 +25,12 @@ public class FotoStorageLocal implements FotoStorage {
 	private Path localTemporario;
 
 	public FotoStorageLocal() {
-		this(getDefault().getPath(System.getProperty("user.home"), ".brewerfotos"));
+		this(getDefault().getPath(System.getenv("HOME"), ".brewerfotos"));
 	}
 
 	public FotoStorageLocal(Path path) {
 		this.local = path;
 		criarPastas();
-	}
-
-	private void criarPastas() {
-		try {
-			Files.createDirectories(this.local);
-			this.localTemporario = getDefault().getPath(this.local.toString(), "temp");
-			Files.createDirectories(this.localTemporario);
-
-			if (logger.isDebugEnabled()) {
-				logger.debug("Pastas criadas para salvar fotos.");
-				logger.debug("Pasta default: " + this.local.toAbsolutePath());
-				logger.debug("Pasta temporária: " + this.localTemporario.toAbsolutePath());
-			}
-		} catch (IOException e) {
-			throw new RuntimeException("Erro criando pasta para salvar foto", e);
-		}
 	}
 
 	@Override
@@ -67,17 +51,56 @@ public class FotoStorageLocal implements FotoStorage {
 	}
 
 	@Override
+	public byte[] recuperarFotoTemporaria(String nome) {
+		try {
+			return Files.readAllBytes(this.localTemporario.resolve(nome));
+		} catch (IOException e) {
+			throw new RuntimeException("Erro lendo a foto temporária", e);
+		}
+	}
+
+	@Override
 	public void salvar(String foto) {
 		try {
 			Files.move(this.localTemporario.resolve(foto), this.local.resolve(foto));
 		} catch (IOException e) {
-			throw new RuntimeException("Erro movendo a foto para destino final.", e);
+			throw new RuntimeException("Erro movendo a foto para destino final", e);
 		}
-		
+
 		try {
 			Thumbnails.of(this.local.resolve(foto).toString()).size(40, 68).toFiles(Rename.PREFIX_DOT_THUMBNAIL);
 		} catch (IOException e) {
-			throw new RuntimeException("Erro gerando o thumbnail.", e);
+			throw new RuntimeException("Erro gerando thumbnail", e);
+		}
+	}
+
+	@Override
+	public byte[] recuperar(String nome) {
+		try {
+			return Files.readAllBytes(this.local.resolve(nome));
+		} catch (IOException e) {
+			throw new RuntimeException("Erro lendo a foto", e);
+		}
+	}
+
+	@Override
+	public byte[] recuperarThumbnail(String fotoCerveja) {
+		return recuperar("thumbnail." + fotoCerveja);
+	}
+
+	private void criarPastas() {
+		try {
+			Files.createDirectories(this.local);
+			this.localTemporario = getDefault().getPath(this.local.toString(), "temp");
+			Files.createDirectories(this.localTemporario);
+
+			if (logger.isDebugEnabled()) {
+				logger.debug("Pastas criadas para salvar fotos.");
+				logger.debug("Pasta default: " + this.local.toAbsolutePath());
+				logger.debug("Pasta temporária: " + this.localTemporario.toAbsolutePath());
+			}
+		} catch (IOException e) {
+			throw new RuntimeException("Erro criando pasta para salvar foto", e);
 		}
 	}
 
@@ -90,33 +113,6 @@ public class FotoStorageLocal implements FotoStorage {
 
 		return novoNome;
 
-	}
-
-	@Override
-	public byte[] recuperarFotoTemporaria(String nome) {
-		try {
-			return Files.readAllBytes(this.localTemporario.resolve(nome));
-		} catch (IOException e) {
-			throw new RuntimeException("Erro lendo a foto temporária.", e);
-		}
-	}
-
-	@Override
-	public void apagarFotoTemporaria(String nome) {
-		try {
-			Files.deleteIfExists(this.localTemporario.resolve(nome));
-		} catch (IOException e) {
-			throw new RuntimeException("Erro ao apagar foto temporária", e);
-		}
-	}
-	
-	@Override
-	public byte[] recuperarFoto(String nome) {
-		try {
-			return Files.readAllBytes(this.local.resolve(nome));
-		} catch (IOException e) {
-			throw new RuntimeException("Erro lendo a foto.", e);
-		}
 	}
 
 }
