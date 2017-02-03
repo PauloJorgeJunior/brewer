@@ -20,9 +20,10 @@ import com.algaworks.brewer.model.Cerveja;
 import com.algaworks.brewer.repository.Cervejas;
 
 @Configuration
-@ComponentScan(basePackageClasses=Cervejas.class)
+@ComponentScan(basePackageClasses = Cervejas.class)
 @EnableJpaRepositories(basePackageClasses = Cervejas.class, enableDefaultTransactions = false)
 @EnableTransactionManagement
+@ComponentScan(basePackageClasses = Cervejas.class)
 public class JPAConfig {
 
 	@Bean
@@ -31,7 +32,7 @@ public class JPAConfig {
 		dataSourceLookup.setResourceRef(true);
 		return dataSourceLookup.getDataSource("jdbc/brewerDB");
 	}
-
+	
 	@Bean
 	public JpaVendorAdapter jpaVendorAdapter() {
 		HibernateJpaVendorAdapter adapter = new HibernateJpaVendorAdapter();
@@ -41,22 +42,23 @@ public class JPAConfig {
 		adapter.setDatabasePlatform("org.hibernate.dialect.MySQLDialect");
 		return adapter;
 	}
-
+	
 	@Bean
 	public EntityManagerFactory entityManagerFactory(DataSource dataSource, JpaVendorAdapter jpaVendorAdapter) {
 		LocalContainerEntityManagerFactoryBean factory = new LocalContainerEntityManagerFactoryBean();
 		factory.setDataSource(dataSource);
 		factory.setJpaVendorAdapter(jpaVendorAdapter);
 		factory.setPackagesToScan(Cerveja.class.getPackage().getName());
+		factory.setMappingResources("sql/consultas-nativas.xml");
 		factory.afterPropertiesSet();
 		return factory.getObject();
 	}
-
+	
 	@Bean
 	public PlatformTransactionManager transactionManager(EntityManagerFactory entityManagerFactory) {
 		JpaTransactionManager transactionManager = new JpaTransactionManager();
 		transactionManager.setEntityManagerFactory(entityManagerFactory);
 		return transactionManager;
 	}
-
+	
 }

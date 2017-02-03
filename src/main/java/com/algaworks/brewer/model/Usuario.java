@@ -23,7 +23,7 @@ import org.hibernate.validator.constraints.NotBlank;
 
 import com.algaworks.brewer.validation.AtributoConfirmacao;
 
-@AtributoConfirmacao(atributo = "senha", atributoConfirmacao = "confirmacaoSenha", message = "As senhas não conferem!")
+@AtributoConfirmacao(atributo = "senha", atributoConfirmacao = "confirmacaoSenha", message = "Confirmação da senha não confere")
 @Entity
 @Table(name = "usuario")
 @DynamicUpdate
@@ -42,7 +42,6 @@ public class Usuario implements Serializable {
 	@Email(message = "E-mail inválido")
 	private String email;
 
-	
 	private String senha;
 
 	@Transient
@@ -62,7 +61,7 @@ public class Usuario implements Serializable {
 	private void preUpdate() {
 		this.confirmacaoSenha = senha;
 	}
-	
+
 	public Long getCodigo() {
 		return codigo;
 	}
@@ -129,6 +128,10 @@ public class Usuario implements Serializable {
 
 	public boolean isNovo() {
 		return codigo == null;
+	}
+
+	public boolean isEdicao() {
+		return codigo != null;
 	}
 
 	@Override

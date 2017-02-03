@@ -1,5 +1,6 @@
 package com.algaworks.brewer.controller;
 
+import java.util.List;
 import java.util.UUID;
 
 import javax.servlet.http.HttpServletRequest;
@@ -7,6 +8,7 @@ import javax.servlet.http.HttpServletRequest;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.web.PageableDefault;
+import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.stereotype.Controller;
 import org.springframework.util.StringUtils;
@@ -19,13 +21,17 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.servlet.ModelAndView;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import com.algaworks.brewer.controller.page.PageWrapper;
 import com.algaworks.brewer.controller.validator.VendaValidator;
+import com.algaworks.brewer.dto.VendaMes;
+import com.algaworks.brewer.dto.VendaOrigem;
 import com.algaworks.brewer.mail.Mailer;
 import com.algaworks.brewer.model.Cerveja;
+import com.algaworks.brewer.model.ItemVenda;
 import com.algaworks.brewer.model.StatusVenda;
 import com.algaworks.brewer.model.TipoPessoa;
 import com.algaworks.brewer.model.Venda;
@@ -39,7 +45,7 @@ import com.algaworks.brewer.session.TabelasItensSession;
 @Controller
 @RequestMapping("/vendas")
 public class VendasController {
-
+	
 	@Autowired
 	private Cervejas cervejas;
 	
@@ -67,9 +73,7 @@ public class VendasController {
 	public ModelAndView nova(Venda venda) {
 		ModelAndView mv = new ModelAndView("venda/CadastroVenda");
 		
-		if (StringUtils.isEmpty(venda.getUuid())) {
-			venda.setUuid(UUID.randomUUID().toString());
-		}
+		setUuid(venda);
 		
 		mv.addObject("itens", venda.getItens());
 		mv.addObject("valorFrete", venda.getValorFrete());
@@ -119,7 +123,7 @@ public class VendasController {
 		venda = cadastroVendaService.salvar(venda);
 		mailer.enviar(venda);
 		
-		attributes.addFlashAttribute("mensagem",String.format("Venda nº %d salva com sucesso e e-mail enviado", venda.getCodigo()));
+		attributes.addFlashAttribute("mensagem", String.format("Venda nº %d salva com sucesso e e-mail enviado", venda.getCodigo()));
 		return new ModelAndView("redirect:/vendas/nova");
 	}
 	
@@ -146,7 +150,7 @@ public class VendasController {
 	
 	@GetMapping
 	public ModelAndView pesquisar(VendaFilter vendaFilter,
-			@PageableDefault(size = 3) Pageable pageable, HttpServletRequest httpServletRequest) {
+			@PageableDefault(size = 10) Pageable pageable, HttpServletRequest httpServletRequest) {
 		ModelAndView mv = new ModelAndView("/venda/PesquisaVendas");
 		mv.addObject("todosStatus", StatusVenda.values());
 		mv.addObject("tiposPessoa", TipoPessoa.values());
@@ -155,6 +159,43 @@ public class VendasController {
 				, httpServletRequest);
 		mv.addObject("pagina", paginaWrapper);
 		return mv;
+	}
+	
+	@GetMapping("/{codigo}")
+	public ModelAndView editar(@PathVariable Long codigo) {
+		Venda venda = vendas.buscarComItens(codigo);
+		
+		setUuid(venda);
+		for (ItemVenda item : venda.getItens()) {
+			tabelaItens.adicionarItem(venda.getUuid(), item.getCerveja(), item.getQuantidade());
+		}
+		
+		ModelAndView mv = nova(venda);
+		mv.addObject(venda);
+		return mv;
+	}
+	
+	@PostMapping(value = "/nova", params = "cancelar")
+	public ModelAndView cancelar(Venda venda, BindingResult result
+				, RedirectAttributes attributes, @AuthenticationPrincipal UsuarioSistema usuarioSistema) {
+		try {
+			cadastroVendaService.cancelar(venda);
+		} catch (AccessDeniedException e) {
+			return new ModelAndView("/403");
+		}
+		
+		attributes.addFlashAttribute("mensagem", "Venda cancelada com sucesso");
+		return new ModelAndView("redirect:/vendas/" + venda.getCodigo());
+	}
+	
+	@GetMapping("/totalPorMes")
+	public @ResponseBody List<VendaMes> listarTotalVendaPorMes() {
+		return vendas.totalPorMes();
+	}
+	
+	@GetMapping("/porOrigem")
+	public @ResponseBody List<VendaOrigem> vendasPorNacionalidade() {
+		return this.vendas.totalPorOrigem();
 	}
 	
 	private ModelAndView mvTabelaItensVenda(String uuid) {
@@ -170,4 +211,11 @@ public class VendasController {
 		
 		vendaValidator.validate(venda, result);
 	}
+	
+	private void setUuid(Venda venda) {
+		if (StringUtils.isEmpty(venda.getUuid())) {
+			venda.setUuid(UUID.randomUUID().toString());
+		}
+	}
+
 }
