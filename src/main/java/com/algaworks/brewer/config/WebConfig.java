@@ -2,7 +2,6 @@ package com.algaworks.brewer.config;
 
 import java.math.BigDecimal;
 import java.time.format.DateTimeFormatter;
-import java.util.Locale;
 import java.util.concurrent.TimeUnit;
 
 import org.springframework.beans.BeansException;
@@ -19,16 +18,15 @@ import org.springframework.context.support.ReloadableResourceBundleMessageSource
 import org.springframework.data.repository.support.DomainClassConverter;
 import org.springframework.data.web.config.EnableSpringDataWebSupport;
 import org.springframework.format.datetime.standard.DateTimeFormatterRegistrar;
-import org.springframework.format.number.NumberStyleFormatter;
 import org.springframework.format.support.DefaultFormattingConversionService;
 import org.springframework.format.support.FormattingConversionService;
 import org.springframework.scheduling.annotation.EnableAsync;
-import org.springframework.web.servlet.LocaleResolver;
+import org.springframework.validation.Validator;
+import org.springframework.validation.beanvalidation.LocalValidatorFactoryBean;
 import org.springframework.web.servlet.ViewResolver;
 import org.springframework.web.servlet.config.annotation.EnableWebMvc;
 import org.springframework.web.servlet.config.annotation.ResourceHandlerRegistry;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurerAdapter;
-import org.springframework.web.servlet.i18n.FixedLocaleResolver;
 import org.thymeleaf.TemplateEngine;
 import org.thymeleaf.extras.springsecurity4.dialect.SpringSecurityDialect;
 import org.thymeleaf.spring4.SpringTemplateEngine;
@@ -37,6 +35,7 @@ import org.thymeleaf.spring4.view.ThymeleafViewResolver;
 import org.thymeleaf.templatemode.TemplateMode;
 import org.thymeleaf.templateresolver.ITemplateResolver;
 
+import com.algaworks.brewer.config.format.BigDecimalFormatter;
 import com.algaworks.brewer.controller.CervejasController;
 import com.algaworks.brewer.controller.converter.CidadeConverter;
 import com.algaworks.brewer.controller.converter.EstadoConverter;
@@ -77,6 +76,7 @@ public class WebConfig extends WebMvcConfigurerAdapter implements ApplicationCon
 		SpringTemplateEngine engine = new SpringTemplateEngine();
 		engine.setEnableSpringELCompiler(true);
 		engine.setTemplateResolver(templateResolver());
+		
 		engine.addDialect(new LayoutDialect());
 		engine.addDialect(new BrewerDialect());
 		engine.addDialect(new DataAttributeDialect());
@@ -92,12 +92,12 @@ public class WebConfig extends WebMvcConfigurerAdapter implements ApplicationCon
 		resolver.setTemplateMode(TemplateMode.HTML);
 		return resolver;
 	}
-
+	
 	@Override
 	public void addResourceHandlers(ResourceHandlerRegistry registry) {
 		registry.addResourceHandler("/**").addResourceLocations("classpath:/static/");
 	}
-
+	
 	@Bean
 	public FormattingConversionService mvcConversionService() {
 		DefaultFormattingConversionService conversionService = new DefaultFormattingConversionService();
@@ -105,51 +105,57 @@ public class WebConfig extends WebMvcConfigurerAdapter implements ApplicationCon
 		conversionService.addConverter(new CidadeConverter());
 		conversionService.addConverter(new EstadoConverter());
 		conversionService.addConverter(new GrupoConverter());
-
-		NumberStyleFormatter bigDecimalFormatter = new NumberStyleFormatter("#,##0.00");
+		
+		BigDecimalFormatter bigDecimalFormatter = new BigDecimalFormatter("#,##0.00");
 		conversionService.addFormatterForFieldType(BigDecimal.class, bigDecimalFormatter);
-
-		NumberStyleFormatter integerFormatter = new NumberStyleFormatter("#,##0");
+		
+		BigDecimalFormatter integerFormatter = new BigDecimalFormatter("#,##0");
 		conversionService.addFormatterForFieldType(Integer.class, integerFormatter);
-
+		
 		// API de Datas do Java 8
-		DateTimeFormatterRegistrar dateTimeFormatterRegistrar = new DateTimeFormatterRegistrar();
-		dateTimeFormatterRegistrar.setDateFormatter(DateTimeFormatter.ofPattern("dd/MM/yyyy"));
-		dateTimeFormatterRegistrar.setTimeFormatter(DateTimeFormatter.ofPattern("HH:mm"));
-		dateTimeFormatterRegistrar.registerFormatters(conversionService);
-
+		DateTimeFormatterRegistrar dateTimeFormatter = new DateTimeFormatterRegistrar();
+		dateTimeFormatter.setDateFormatter(DateTimeFormatter.ofPattern("dd/MM/yyyy"));
+		dateTimeFormatter.setTimeFormatter(DateTimeFormatter.ofPattern("HH:mm"));
+		dateTimeFormatter.registerFormatters(conversionService);
+		
 		return conversionService;
 	}
-
-	public LocaleResolver localeResolver() {
-		return new FixedLocaleResolver(new Locale("pt", "BR"));
-	}
-
+	
 	@Bean
 	public CacheManager cacheManager() {
-		CacheBuilder<Object, Object> cacheBuilder = CacheBuilder.newBuilder().maximumSize(3).expireAfterAccess(20,
-				TimeUnit.SECONDS);
-
+		CacheBuilder<Object, Object> cacheBuilder = CacheBuilder.newBuilder()
+				.maximumSize(3)
+				.expireAfterAccess(20, TimeUnit.SECONDS);
+		
 		GuavaCacheManager cacheManager = new GuavaCacheManager();
 		cacheManager.setCacheBuilder(cacheBuilder);
 		return cacheManager;
-
 	}
-
+	
 	@Bean
 	public MessageSource messageSource() {
 		ReloadableResourceBundleMessageSource bundle = new ReloadableResourceBundleMessageSource();
 		bundle.setBasename("classpath:/messages");
-		bundle.setDefaultEncoding("UTF-8");// http://www.utf8-chartable.de/ ou
-											// http://native2ascii.net/
-
+		bundle.setDefaultEncoding("UTF-8"); // http://www.utf8-chartable.de/
 		return bundle;
-
 	}
-
+	
 	@Bean
 	public DomainClassConverter<FormattingConversionService> domainClassConverter() {
 		return new DomainClassConverter<FormattingConversionService>(mvcConversionService());
 	}
+	
+	@Bean
+	public LocalValidatorFactoryBean validator() {
+	    LocalValidatorFactoryBean validatorFactoryBean = new LocalValidatorFactoryBean();
+	    validatorFactoryBean.setValidationMessageSource(messageSource());
+	    
+	    return validatorFactoryBean;
+	}
 
+	@Override
+	public Validator getValidator() {
+		return validator();
+	}
+	
 }
